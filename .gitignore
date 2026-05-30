@@ -51,6 +51,7 @@ coverage.xml
 .pytest_cache/
 cover/
 .env
+resume.pdf
 
 
 # Translations
