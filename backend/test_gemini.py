@@ -1,3 +1,4 @@
+from google import genai
 from dotenv import load_dotenv
 import os
 
@@ -36,6 +37,7 @@ Top 3 Improvements:
 
 Keep the response under 120 words.
 Be concise and direct.
+Score should be based ONLY on suitability for the target role, not generic ATS keywords.
 """
 
 response = client.models.generate_content(
