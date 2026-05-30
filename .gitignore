@@ -52,6 +52,7 @@ coverage.xml
 cover/
 .env
 
+
 # Translations
 *.mo
 *.pot
