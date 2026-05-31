@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ResumeIQ — Role-Based Resume Analyser</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131a;
+      --border: #1e1e2e;
+      --accent: #7c6af7;
+      --accent2: #f7a26a;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --success: #6af7a2;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    /* background glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(124,106,247,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%; max-width: 680px;
+      position: relative; z-index: 1;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(124,106,247,0.15);
+      border: 1px solid rgba(124,106,247,0.3);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 300;
+      max-width: 420px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* File Upload */
+    .file-upload {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .file-upload:hover, .file-upload.drag-over {
+      border-color: var(--accent);
+      background: rgba(124,106,247,0.05);
+    }
+
+    .file-upload input {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+
+    .file-icon { font-size: 28px; margin-bottom: 8px; }
+
+    .file-upload p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .file-upload .file-name {
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    /* Inputs */
+    input[type="text"] {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="text"]::placeholder { color: var(--muted); }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover { background: #9080ff; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Loader */
+    .loader {
+      display: none;
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .loader.active { display: block; }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Result */
+    .result-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      margin-top: 24px;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .result-card.active { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .result-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .score-pill {
+      background: rgba(106,247,162,0.1);
+      border: 1px solid rgba(106,247,162,0.3);
+      color: var(--success);
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      padding: 8px 20px;
+      border-radius: 50px;
+    }
+
+    .result-body {
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #c8c8d8;
+    }
+
+    .result-body strong {
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    /* Error */
+    .error-msg {
+      display: none;
+      background: rgba(247,106,106,0.1);
+      border: 1px solid rgba(247,106,106,0.3);
+      color: #f76a6a;
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-top: 16px;
+    }
+
+    .error-msg.active { display: block; }
+
+    /* Footer */
+    footer {
+      margin-top: 48px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">AI-Powered · Market-Driven</div>
+      <h1>ResumeIQ</h1>
+      <p class="subtitle">Get a role-specific resume score based on real job market data — not generic keywords.</p>
+    </header>
+
+    <div class="card">
+      <div class="form-group">
+        <label>Resume (PDF)</label>
+        <div class="file-upload" id="fileUpload">
+          <input type="file" id="resumeFile" accept=".pdf" />
+          <div class="file-icon">📄</div>
+          <p>Drop your PDF here or <strong style="color:var(--accent)">browse</strong></p>
+          <div class="file-name" id="fileName"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Target Role</label>
+        <input type="text" id="roleInput" placeholder="e.g. Data Scientist, Backend Engineer, Product Manager" />
+      </div>
+
+      <div class="form-group">
+        <label>GitHub Username <span style="color:var(--muted);font-size:10px;letter-spacing:0">(optional)</span></label>
+        <input type="text" id="githubInput" placeholder="e.g. anshikarolya" />
+      </div>
+
+      <button class="btn" id="analyseBtn" onclick="analyseResume()">
+        Analyse My Resume →
+      </button>
+
+      <div class="error-msg" id="errorMsg"></div>
+    </div>
+
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <p id="loaderText">Fetching real job data from Indeed...</p>
+    </div>
+
+    <div class="result-card" id="resultCard">
+      <div class="result-header">
+        <div class="result-title">Analysis Result</div>
+        <div class="score-pill" id="scorePill">—</div>
+      </div>
+      <div class="result-body" id="resultBody"></div>
+    </div>
+
+    <footer>Powered by Anakin Wire · Google Gemini · Built for Anakin Build-A-Thon 2026</footer>
+  </div>
+
+  <script>
+    // File upload display
+    document.getElementById('resumeFile').addEventListener('change', function() {
+      const name = this.files[0]?.name || '';
+      document.getElementById('fileName').textContent = name;
+    });
+
+    const loaderMessages = [
+      "Fetching real job data from Indeed...",
+      "Scanning GitHub projects...",
+      "Comparing with market requirements...",
+      "Generating your score...",
+    ];
+
+    let loaderInterval;
+
+    function startLoader() {
+      let i = 0;
+      document.getElementById('loaderText').textContent = loaderMessages[0];
+      loaderInterval = setInterval(() => {
+        i = (i + 1) % loaderMessages.length;
+        document.getElementById('loaderText').textContent = loaderMessages[i];
+      }, 3000);
+    }
+
+    function stopLoader() { clearInterval(loaderInterval); }
+
+    function extractScore(text) {
+      const match = text.match(/Role Match Score[:\s]+(\d+)\/100/i);
+      return match ? match[1] + '/100' : null;
+    }
+
+    function formatResult(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(Role Match Score:.*)/g, '<strong style="color:var(--success)">$1</strong>')
+        .replace(/(Missing Skills:|Missing Project Types:|Top 3 Improvements:|Current Profile:|Top Skills Present:|Market Insight:)/g, 
+                 '<strong style="color:var(--accent2)">$1</strong>');
+    }
+
+    async function analyseResume() {
+      const file = document.getElementById('resumeFile').files[0];
+      const role = document.getElementById('roleInput').value.trim();
+      const github = document.getElementById('githubInput').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+
+      errorMsg.classList.remove('active');
+
+      if (!file) { showError('Please upload your resume PDF!'); return; }
+      if (!role) { showError('Please enter your target role!'); return; }
+
+      const formData = new FormData();
+      formData.append('resume', file);
+      formData.append('role', role);
+      formData.append('github', github);
+
+      // UI state
+      document.getElementById('analyseBtn').disabled = true;
+      document.getElementById('resultCard').classList.remove('active');
+      document.getElementById('loader').classList.add('active');
+      startLoader();
+
+      try {
+        const res = await fetch('/analyse', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.error) { showError(data.error); return; }
+
+        const score = extractScore(data.result);
+        if (score) document.getElementById('scorePill').textContent = score;
+
+        document.getElementById('resultBody').innerHTML = formatResult(data.result);
+        document.getElementById('resultCard').classList.add('active');
+
+      } catch (e) {
+        showError('Something went wrong. Please try again.');
+      } finally {
+        stopLoader();
+        document.getElementById('loader').classList.remove('active');
+        document.getElementById('analyseBtn').disabled = false;
+      }
+    }
+
+    function showError(msg) {
+      stopLoader();
+      document.getElementById('loader').classList.remove('active');
+      document.getElementById('analyseBtn').disabled = false;
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.classList.add('active');
+    }
+  </script>
+</body>
+</html>
