@@ -207,42 +207,58 @@ Real Market Job Descriptions for {role} (from Indeed):
 {job_descriptions if job_descriptions else "No job descriptions fetched — use your knowledge of this role."}
 
 INSTRUCTIONS:
-- Analyse the resume and GitHub projects against the real market requirements for {role}.
-- Score should be ONLY based on suitability for this specific role.
-- Be specific, honest, and actionable.
+
+* Analyse the resume and GitHub projects against the real market requirements for {role}.
+* Score should be ONLY based on suitability for this specific role.
+* Ignore resume formatting, design, and ATS styling.
+* Focus on skills, projects, coursework, tools, experience, and achievements.
+* Derive missing skills, project types, and keywords from the provided job descriptions.
+* Do not generate generic career advice.
+* Keep recommendations specific and actionable.
 
 Return EXACTLY in this format:
 
 Role Match Score: XX/100
 
 Current Profile:
-(2 lines summary of candidate's current standing)
+(1-2 lines summary of candidate's current standing)
 
 Top Skills Present:
-- skill 1
-- skill 2
-- skill 3
+
+* skill 1
+* skill 2
+* skill 3
 
 Missing Skills:
-- skill 1
-- skill 2
-- skill 3
-- skill 4
+
+* skill 1
+* skill 2
+* skill 3
+* skill 4
 
 Missing Project Types:
-- project type 1
-- project type 2
+
+* project type 1
+* project type 2
+
+Top 3 Missing Keywords:
+
+* keyword 1
+* keyword 2
+* keyword 3
 
 Top 3 Improvements:
+
 1. improvement 1
 2. improvement 2
 3. improvement 3
 
 Market Insight:
-(1-2 lines about what this role actually demands right now)
+(1-2 lines about what employers currently expect for this role)
 
 Keep total response under 200 words.
 """
+
 
     response = gemini_client.models.generate_content(
         model="gemini-2.5-flash",
